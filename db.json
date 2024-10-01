@@ -1,0 +1,22 @@
+{
+  "products": [
+    {
+      "name": "shirt",
+      "price": "10000",
+      "img": "https://m.media-amazon.com/images/I/31YM1iha5XL._SY445_SX342_.jpg",
+      "id": "2"
+    },
+    {
+      "id": "3",
+      "name": "western",
+      "price": "5000",
+      "img": "https://m.media-amazon.com/images/I/41LTHoYbCAL.jpg"
+    },
+    {
+      "id": "1",
+      "name": "shirt",
+      "price": "10000",
+      "img": "https://m.media-amazon.com/images/I/51-pLhPHoBL._AC_UL480_FMwebp_QL65_.jpg"
+    }
+  ]
+}

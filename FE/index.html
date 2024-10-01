@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+         * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Form Styling */
+        form {
+            display: flex;
+            flex-direction: column;
+            max-width: 400px;
+            margin: 0 auto 40px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input, button {
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        input {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+
+        input:focus {
+            border-color: #ed2323;
+            outline: none;
+        }
+
+        button {
+            background-color: #f31e7a;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #f4161a;
+        }
+
+        /* Product Container Styling */
+        #products-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        #products-container > div {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #products-container > div:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 18px;
+            color: #6717d7;
+            margin-bottom: 10px;
+        }
+
+        h4 {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        button.delete-btn {
+            background-color: #dc3545;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button.delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            form, #products-container {
+                padding: 10px;
+            }
+
+            #products-container {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Form to Add or Update Products -->
+    <h2>Add or Update Product</h2>
+    <input type="text" id="id" placeholder="Product ID" /><br>
+    <input type="text" id="name" placeholder="Product Name" /><br>
+    <input type="text" id="price" placeholder="Product Price" /><br>
+    <input type="text" id="img" placeholder="enter image url" /><br>
+    <button onclick="addItem()">Add Product</button>
+    <button onclick="updateItem()">Update Product</button>
+
+    <!-- Container for product display -->
+    <h2>Product List</h2>
+    <div id="products-container"></div>
+</body>
+
+</html>
+<script>
+    function renderProducts(products) {
+        const box = document.getElementById("products-container")
+        box.innerHTML = "";
+        products.forEach(el => {
+            let div = document.createElement("div");
+            div.id = `product-${el.id}`;  // Give each product a unique ID for easy DOM manipulation
+
+            let img = document.createElement("img");
+            img.setAttribute("src",el.img);
+
+            let h1 = document.createElement("h1");
+            h1.innerText = el.name;
+
+            let h2 = document.createElement("h2");
+            h2.innerText = `Price: ${el.price}`;
+
+            let h4 = document.createElement("h4");
+            h4.innerText = `ID: ${el.id}`;
+
+            let deletebtn = document.createElement("button");
+            deletebtn.innerText = "Delete";
+            deletebtn.onclick = () => deleteItem(el.id);
+
+
+            div.append(img, h1, h2, h4, deletebtn);
+            box.append(div);
+        });
+    }
+    async function fetchProducts() {
+        try {
+            let res = await fetch("http://localhost:3000/api/products", {
+                method: "GET",
+                headers: { 'Content-Type': 'application/json' }
+            });
+            console.log("Response status:",res.status);
+            let data = await res.json();
+            renderProducts(data);
+        }
+        catch (err) {
+            console.error("Error fetching products:", err);
+        }
+    }
+    window.onload = function() {
+    fetchProducts();
+    };
+    async function addItem(){
+        const dat ={
+            id : document.getElementById("id").value,
+            name : document.getElementById("name").value,
+            price : document.getElementById("price").value,
+            img : document.getElementById("img").value,
+        }
+        try {
+            let res = await fetch("http://localhost:3000/api/products", {
+                method: "POST",
+                body:JSON.stringify(dat),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            if (res.ok) {
+                let date = await res.json();
+                console.log("Product added:", date);
+            } else {
+                console.error("Failed to add product. Status:", res.status);
+            }
+  
+        }
+        catch (err) {
+            console.error("Error fetching products:", err);
+        }
+    
+    }
+    async function deleteItem(el){
+        try {
+            let res = await fetch(`http://localhost:3000/api/products/${el}`, {
+                method: "DELETE",
+                headers: { 'Content-Type': 'application/json' }
+            });
+            let date = await res.json();
+  
+        }
+        catch (err) {
+            console.error("Error fetching products:", err);
+        }
+    
+    }
+    async function updateItem() {
+        const dat ={
+            name : document.getElementById("name").value,
+            price : document.getElementById("price").value,
+            img : document.getElementById("img").value,
+        }
+        
+    try {
+        let id = document.getElementById("id").value;
+        let res = await fetch(`http://localhost:3000/api/products/${id}`, {
+            method: "PUT",  // Use PUT to replace the entire resource
+            body: JSON.stringify(dat),
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (res.ok) {
+            let date = await res.json();
+            console.log("Product updated with PUT:", date);
+        } else {
+            console.error("Failed to update product with PUT. Status:", res.status);
+        }
+    } catch (err) {
+        console.error("Error updating product with PUT:", err);
+    }
+}
+    // async function update_item(){
+    //     //let id = document.getElementById("delete").value;
+    //     let res = await fetch(`http://localhost:3000/api/products/2`,{
+    //         method:"PUT",
+    //         body:JSON.stringify({
+
+    //            name : "messi",
+    //            price:30000000,
+    //         }),
+    //         headers:{'Content-Type':'application/json'}
+    //     });
+    //     let dat = await res.json();
+    // }
+</script>
